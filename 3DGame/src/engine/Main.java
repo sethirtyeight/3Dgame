@@ -15,6 +15,7 @@ public class Main implements Runnable {
 	
 	private Thread thread;
 	private long windowID;
+	private lon ab1;
 	private int width = 1200, height = 800;
 	private ShaderProgram shaderProgram;
 	
