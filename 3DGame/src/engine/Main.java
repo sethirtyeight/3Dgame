@@ -6,6 +6,10 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.*;
+
+import java.nio.FloatBuffer;
+
+import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
 import static org.lwjgl.opengl.GL.*;
 
@@ -17,6 +21,9 @@ public class Main implements Runnable {
 	private long windowID;
 	private int width = 1200, height = 800;
 	private ShaderProgram shaderProgram;
+	
+	private int vaoID;
+	private int vboID;
 	
 	public static void main(String args[]) {
 		new Main().start();
@@ -46,7 +53,7 @@ public class Main implements Runnable {
 
 		shaderProgram = new ShaderProgram();
 		shaderProgram.attachVertexShader("engine/vertex.vs");
-		shaderProgram.attachFragmentShader("engine/fragment.vs"); 
+		shaderProgram.attachFragmentShader("engine/fragment.fs"); 
 		shaderProgram.link(); 
 		
 		 // Generate and bind a Vertex Array
@@ -92,7 +99,19 @@ public class Main implements Runnable {
 	}
 	
 	public void render() {
-	 
+		glClear(GL_COLOR_BUFFER_BIT);
+		shaderProgram.bind();
+		
+		glBindVertexArray(vaoID);
+		glEnableVertexAttribArray(0);
+		
+		glDrawArrays(GL_TRIANGLES, 0, 3);
+		
+		glDisableVertexAttribArray(0);
+		glBindVertexArray(0);
+		
+		shaderProgram.unbind();
+		
 		glfwSwapBuffers(windowID);
 	}
 	
