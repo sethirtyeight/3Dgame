@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 
+import shaders.ShaderProgram;
+
 public class FileUtil {
 
 	public static String getFileAsString(String iv_fileName) {

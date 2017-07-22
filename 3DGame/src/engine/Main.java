@@ -1,5 +1,4 @@
 package engine;
-import util.ShaderProgram;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL15.*;
@@ -7,10 +6,10 @@ import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.*;
 
-import java.nio.FloatBuffer;
-
-import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.GL;
+
+import shaders.StaticShader;
+
 import static org.lwjgl.opengl.GL.*;
 
 public class Main implements Runnable {
@@ -20,10 +19,10 @@ public class Main implements Runnable {
 	private Thread thread;
 	private long windowID;
 	private int width = 1200, height = 800;
-	private ShaderProgram shaderProgram;
-	
-	private int vaoID;
-	private int vboID;
+	private Loader loader;
+	private Renderer renderer;
+	private RawModel model;
+	private StaticShader shader;
 	
 	public static void main(String args[]) {
 		new Main().start();
@@ -51,38 +50,23 @@ public class Main implements Runnable {
 		glfwMakeContextCurrent(windowID);   
 		GL.createCapabilities();
 
-		shaderProgram = new ShaderProgram();
-		shaderProgram.attachVertexShader("engine/vertex.vs");
-		shaderProgram.attachFragmentShader("engine/fragment.fs"); 
-		shaderProgram.link(); 
-		
-		 // Generate and bind a Vertex Array
-        vaoID = glGenVertexArrays();
-        glBindVertexArray(vaoID);
+		loader = new Loader();
+		renderer = new Renderer();
+		shader = new StaticShader();
 
-        // The vertices of our Triangle
-        float[] vertices = new float[]
+        float[] vertices = 
         {
-            +0.0f, +0.8f,    // Top coordinate
-            -0.8f, -0.8f,    // Bottom-left coordinate
-            +0.8f, -0.8f     // Bottom-right coordinate
+        		-0.5f, 0.5f,  0f,
+        		-0.5f, -0.5f, 0f,
+        		0.5f, -0.5f, 0f,
+        		0.5f, 0.5f, 0f,
         };
-
-        // Create a FloatBuffer of vertices
-        FloatBuffer verticesBuffer = BufferUtils.createFloatBuffer(vertices.length);
-        verticesBuffer.put(vertices).flip();
-
-        // Create a Buffer Object and upload the vertices buffer
-        vboID = glGenBuffers();
-        glBindBuffer(GL_ARRAY_BUFFER, vboID);
-        glBufferData(GL_ARRAY_BUFFER, verticesBuffer, GL_STATIC_DRAW);
-
-        // Point the buffer at location 0, the location we set
-        // inside the vertex shader. You can use any location
-        // but the locations should match
-        glVertexAttribPointer(0, 2, GL_FLOAT, false, 0, 0);
-        glBindVertexArray(0);
-
+        int[] indices = {
+        	0, 1, 3,
+        	3, 1, 2
+        };
+        
+        model = loader.loadToVAO(vertices, indices);
 
 		//glfwSetWindowPos(windowID, 100, 100);
 		//glfwShowWindow(windowID);
@@ -93,26 +77,11 @@ public class Main implements Runnable {
 	}
 	
 	public void close() {
+		shader.cleanUp();
+		loader.cleanUp();
         // Destroy the window 
         glfwDestroyWindow(windowID); 
         glfwTerminate(); 	
-	}
-	
-	public void render() {
-		glClear(GL_COLOR_BUFFER_BIT);
-		shaderProgram.bind();
-		
-		glBindVertexArray(vaoID);
-		glEnableVertexAttribArray(0);
-		
-		glDrawArrays(GL_TRIANGLES, 0, 3);
-		
-		glDisableVertexAttribArray(0);
-		glBindVertexArray(0);
-		
-		shaderProgram.unbind();
-		
-		glfwSwapBuffers(windowID);
 	}
 	
 	@Override
@@ -121,7 +90,11 @@ public class Main implements Runnable {
 		
 		while(running) {
 			update();
-			render();
+			renderer.prepare();
+			shader.start();
+			renderer.render(model);
+			shader.stop();
+			glfwSwapBuffers(windowID);
 			
 			if(glfwWindowShouldClose(windowID)) {
 				running = false;
