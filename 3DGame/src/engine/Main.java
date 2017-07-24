@@ -5,12 +5,14 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.*;
-
-import org.lwjgl.opengl.GL;
-
-import shaders.StaticShader;
-
 import static org.lwjgl.opengl.GL.*;
+import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+
+import models.RawModel;
+import models.TexturedModel;
+import shaders.StaticShader;
+import textures.ModelTexture;
 
 public class Main implements Runnable {
 
@@ -23,6 +25,8 @@ public class Main implements Runnable {
 	private Renderer renderer;
 	private RawModel model;
 	private StaticShader shader;
+	private ModelTexture texture;
+	private TexturedModel texturedModel;
 	
 	public static void main(String args[]) {
 		new Main().start();
@@ -60,14 +64,22 @@ public class Main implements Runnable {
         		-0.5f, -0.5f, 0f,
         		0.5f, -0.5f, 0f,
         		0.5f, 0.5f, 0f,
-        };
+        }; 
         int[] indices = {
         	0, 1, 3,
         	3, 1, 2
         };
+        float[] textureCoords = {
+        		0, 0,
+        		0, 1,
+        		1, 1,
+        		1, 0
+        };
         
-        model = loader.loadToVAO(vertices, indices);
-
+        model = loader.loadToVAO(vertices, textureCoords, indices);
+        texture = new ModelTexture(loader.loadTexture("C:\\Users\\Wojciech Haase\\Pictures\\bricks.png"));
+        texturedModel = new TexturedModel(model, texture);
+        
 		//glfwSetWindowPos(windowID, 100, 100);
 		//glfwShowWindow(windowID);
 	}
@@ -92,7 +104,7 @@ public class Main implements Runnable {
 			update();
 			renderer.prepare();
 			shader.start();
-			renderer.render(model);
+			renderer.render(texturedModel);
 			shader.stop();
 			glfwSwapBuffers(windowID);
 			
