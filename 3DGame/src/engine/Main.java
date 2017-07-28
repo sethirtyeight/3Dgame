@@ -5,10 +5,14 @@ import static org.lwjgl.opengl.GL15.*;
 import static org.lwjgl.opengl.GL20.*;
 import static org.lwjgl.opengl.GL30.*;
 import static org.lwjgl.system.MemoryUtil.*;
+
+import javax.vecmath.Vector3f;
+
 import static org.lwjgl.opengl.GL.*;
 import org.lwjgl.opengl.GL;
 import org.lwjgl.opengl.GL11;
 
+import entities.Entity;
 import models.RawModel;
 import models.TexturedModel;
 import shaders.StaticShader;
@@ -27,6 +31,7 @@ public class Main implements Runnable {
 	private StaticShader shader;
 	private ModelTexture texture;
 	private TexturedModel texturedModel;
+	private Entity entity;
 	
 	public static void main(String args[]) {
 		new Main().start();
@@ -79,7 +84,8 @@ public class Main implements Runnable {
         model = loader.loadToVAO(vertices, textureCoords, indices);
         texture = new ModelTexture(loader.loadTexture("C:\\Users\\Wojciech Haase\\Pictures\\bricks.png"));
         texturedModel = new TexturedModel(model, texture);
-        
+
+        entity = new Entity(texturedModel, new Vector3f(-1,0,0),0,0,0,1); 
 		//glfwSetWindowPos(windowID, 100, 100);
 		//glfwShowWindow(windowID);
 	}
@@ -104,7 +110,7 @@ public class Main implements Runnable {
 			update();
 			renderer.prepare();
 			shader.start();
-			renderer.render(texturedModel);
+			renderer.render(entity,shader);
 			shader.stop();
 			glfwSwapBuffers(windowID);
 			

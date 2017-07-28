@@ -6,6 +6,12 @@ import static org.lwjgl.opengl.GL20.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.nio.FloatBuffer;
+
+import javax.vecmath.*;
+
+import org.lwjgl.BufferUtils;
+import org.lwjgl.opengl.GL20;
 
 public abstract class ShaderProgram {
 
@@ -13,6 +19,8 @@ public abstract class ShaderProgram {
 	private int vertexShaderID;
 	private int fragmentShaderID;
 
+	private static FloatBuffer matrixBuffer = BufferUtils.createFloatBuffer(16);
+	
 	public ShaderProgram(String vertexFile, String fragmentFile) {
 		vertexShaderID = loadShader(vertexFile, GL_VERTEX_SHADER);
 		fragmentShaderID = loadShader(fragmentFile, GL_FRAGMENT_SHADER);
@@ -20,15 +28,20 @@ public abstract class ShaderProgram {
 		
 		glAttachShader(programID, vertexShaderID);
 		glAttachShader(programID, fragmentShaderID);
-		
+		bindAttributes();
 		glLinkProgram(programID);
-
 		if (glGetProgrami(programID, GL_LINK_STATUS) == GL_FALSE)
-			throw new RuntimeException("Unable to link shader program");
-		
+			throw new RuntimeException("Unable to link shader program");	
 		glValidateProgram(programID);
+		getAllUniformLocations();
 	}
 
+	protected abstract void getAllUniformLocations();
+	
+	protected int getUniformLocation(String uniformName) {
+		return GL20.glGetUniformLocation(programID, uniformName);
+	}
+	
 	private static int loadShader(String filename, int type) {
 		StringBuilder shaderSource = new StringBuilder();
 		try {
@@ -67,7 +80,31 @@ public abstract class ShaderProgram {
 		glBindAttribLocation(programID, attribute,varName);
 	}
 	
-
+	protected void loadFloat(int location, float value) {
+		GL20.glUniform1f(location, value);
+	}
+	
+	protected void loadVector(int location, Vector3f vector) {
+		GL20.glUniform3f(location, vector.x, vector.y, vector.z);
+	}
+	
+	protected void LoadBoolean(int location, boolean value) {
+		float toLoad = 0;
+		if (value) {
+			toLoad = 1;
+		}
+		GL20.glUniform1f(location, toLoad);
+	}
+	
+	protected void LoadMatrix(int location, Matrix4f matrix) {
+		matrixBuffer.put(matrix.m00).put(matrix.m10).put(matrix.m20).put(matrix.m30);
+		matrixBuffer.put(matrix.m01).put(matrix.m11).put(matrix.m21).put(matrix.m31);
+		matrixBuffer.put(matrix.m02).put(matrix.m12).put(matrix.m22).put(matrix.m32);
+		matrixBuffer.put(matrix.m03).put(matrix.m13).put(matrix.m23).put(matrix.m33);
+		matrixBuffer.flip();
+		GL20.glUniformMatrix4fv(location, false, matrixBuffer);
+	}
+	
 	public void cleanUp() {
 		stop();
 
