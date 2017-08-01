@@ -50,6 +50,7 @@ public class Loader {
 		textures.add(textureID);
 		return textureID;
 	}
+	
 	public void cleanUp() {
 		for(int vao:vaos) {
 			GL30.glDeleteVertexArrays(vao);
@@ -96,6 +97,7 @@ public class Loader {
 		buffer.flip();
 		return buffer;
 	}
+	
 	private FloatBuffer storeDataInFloatBuffer(float[] data) {
 		FloatBuffer buffer = BufferUtils.createFloatBuffer(data.length);
 		buffer.put(data);

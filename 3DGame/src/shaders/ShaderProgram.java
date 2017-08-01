@@ -31,7 +31,7 @@ public abstract class ShaderProgram {
 		bindAttributes();
 		glLinkProgram(programID);
 		if (glGetProgrami(programID, GL_LINK_STATUS) == GL_FALSE)
-			throw new RuntimeException("Unable to link shader program");	
+			throw new RuntimeException("Unable to link shader program");
 		glValidateProgram(programID);
 		getAllUniformLocations();
 	}
