@@ -37,7 +37,7 @@ public class Maths {
 		dest.m03 += src.m00 * vec.x + src.m01 * vec.y + src.m02 * vec.z;
 		dest.m13 += src.m10 * vec.x + src.m11 * vec.y + src.m12 * vec.z;
 		dest.m23 += src.m20 * vec.x + src.m21 * vec.y + src.m22 * vec.z;
-		dest.m33 += src.m30 * vec.x + src.m31 * vec.y + src.m33 * vec.z;
+		dest.m33 += src.m30 * vec.x + src.m31 * vec.y + src.m32 * vec.z;
 		
 		//dest.m30 += src.m00 * vec.x + src.m10 * vec.y + src.m20 * vec.z;
 		//dest.m31 += src.m01 * vec.x + src.m11 * vec.y + src.m21 * vec.z;
